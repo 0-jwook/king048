@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import './App.css'
 import styled from "styled-components";
 
@@ -9,6 +9,23 @@ const Makeboard  = () : number[][] =>{
   addRandomTile(board);
   addRandomTile(board)
   return board;
+}
+
+const moveLeft = (board : number[][]) : number[][] => {
+  return board.map(row => {
+    const newRow : number[] = row.filter(tile => tile !== 0)
+    for(let i = 0; i < newRow.length; i++){
+      if(newRow[i] === newRow[i+1]){
+        newRow[i] *= 2
+        newRow[i+1] = 0;
+      }
+    }
+    const combined = newRow.filter(tile => tile !== 0)
+    while(combined.length < board.length){
+      combined.push(0)
+    }
+    return combined;
+  });
 }
 
 const addRandomTile= (board : number[][]) : number[][] | undefined =>{
@@ -30,7 +47,17 @@ const addRandomTile= (board : number[][]) : number[][] | undefined =>{
 
 const App = () => {
   const [board, setBoard] = useState(Makeboard());
+  useEffect(() => {
+    const handleKeyDown = (e : KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        const newBoard = moveLeft(board)
+        setBoard(addRandomTile(newBoard)!)
+      }
+    }
 
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [board]);
 
   return (
     <div>
