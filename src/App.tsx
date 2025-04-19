@@ -44,6 +44,11 @@ const addRandomTile= (board : number[][]) : number[][] | undefined =>{
   return board;
 }
 
+const moveRight = (board : number[][]):number[][] => {
+  const newboard =  board.map(row => row.slice().reverse());
+  return moveLeft(newboard).map(row => row.reverse());
+}
+
 
 const App = () => {
   const [board, setBoard] = useState(Makeboard());
@@ -53,6 +58,12 @@ const App = () => {
         const newBoard = moveLeft(board)
         setBoard(addRandomTile(newBoard)!)
       }
+
+      if(e.key === 'ArrowRight'){
+        const newBoard = moveRight(board)
+        setBoard(addRandomTile(newBoard)!)
+      }
+
     }
 
     window.addEventListener('keydown', handleKeyDown)
