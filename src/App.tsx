@@ -49,6 +49,22 @@ const moveRight = (board : number[][]):number[][] => {
   return moveLeft(newboard).map(row => row.reverse());
 }
 
+const transpose = (board : number[][]) : number[][] => {
+  return board[0].map((_, i) => board.map(row => row[i]));
+}
+
+const moveUp = (board : number[][]) : number[][] => {
+  const transposedBoard : number[][] = transpose(board);
+  const newBoard : number[][] = moveLeft(transposedBoard);
+  return transpose(newBoard);
+}
+
+const moveDown = (board : number[][]) : number[][] => {
+  const transposedBoard : number[][] = transpose(board);
+  const newBoard : number[][] = moveRight(transposedBoard);
+  return transpose(newBoard);
+}
+
 
 const App = () => {
   const [board, setBoard] = useState(Makeboard());
@@ -64,6 +80,15 @@ const App = () => {
         setBoard(addRandomTile(newBoard)!)
       }
 
+      if(e.key === 'ArrowUp'){
+        const newBoard = moveUp(board)
+        setBoard(addRandomTile(newBoard)!)
+      }
+
+      if(e.key === 'ArrowDown'){
+        const newBoard = moveDown(board)
+        setBoard(addRandomTile(newBoard)!)
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
