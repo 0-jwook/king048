@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react'
-import './App.css'
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import GameOverModal from "./GameOverModal.tsx";
 
 const SIZE : number = 4;
@@ -102,6 +101,7 @@ const App = () => {
   }, [board]);
 
   return (
+    <>
     <div>
       <StyledBoard className="board">
         {board.map((row : number[], x : number) => (
@@ -114,10 +114,13 @@ const App = () => {
           </StyledRow>
         ))}
       </StyledBoard>
-      {gameOver && <GameOverModal />}
     </div>
+    <GameOverModal />
+    </>
   )
 }
+
+
 
 const StyledRow = styled.div`
     display: flex;
