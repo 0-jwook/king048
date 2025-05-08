@@ -100,9 +100,13 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [board]);
 
+
+  const handleCloseModal = () => {
+    setGameOver(false);
+  };
+
   return (
-    <>
-    <div>
+    <Root>
       <StyledBoard className="board">
         {board.map((row : number[], x : number) => (
           <StyledRow className="row" key={x}>
@@ -114,20 +118,26 @@ const App = () => {
           </StyledRow>
         ))}
       </StyledBoard>
-    </div>
-    <GameOverModal />
-    </>
+      {gameOver && <GameOverModal onClose={handleCloseModal} />}
+    </Root>
   )
 }
 
-
+const Root = styled.div`
+    width: 100vw; 
+    height: 100vh;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
 
 const StyledRow = styled.div`
     display: flex;
 `;
 
 const getColor = (number : number) => {
-  if(number === 0) return '#fff';
+  if(number === 0) return 'rgba(238, 228, 218, 0.35)';
   if(number === 2) return '#eee4da';
   if(number === 4) return '#ede0c8';
   if(number === 8) return '#f2b179';
@@ -149,21 +159,27 @@ const getColor = (number : number) => {
 
 const StyledTile = styled.div<{number : number}>`
     background-color: ${({number}) => getColor(number) };
-    width: 50px;
-    height: 50px;
-    border: 1px solid black;
+    width: 100px;
+    height: 100px;
+    //border: 1px solid black;
     margin: 5px;
     border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `
 
 const StyledBoard = styled.div`
-    padding: 10px;
-    background-color: white;
+    padding: 5px;
+    //border: 1px solid black;
+    background-color: #bbada0;
     border-radius: 5px;
 `
 
 const StyledTileLetter = styled.p`
-color: black;
+    color: black;
+    font-family: Pretendard,serif;
+    font-size: 40px;
 `
 
 export default App
