@@ -103,6 +103,7 @@ const App = () => {
 
   const handleCloseModal = () => {
     setGameOver(false);
+    setBoard(Makeboard());
   };
 
   return (
@@ -119,6 +120,7 @@ const App = () => {
         ))}
       </StyledBoard>
       {gameOver && <GameOverModal onClose={handleCloseModal} />}
+      {/*<GameOverModal onClose={handleCloseModal}/>*/}
     </Root>
   )
 }
