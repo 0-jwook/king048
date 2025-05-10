@@ -12,24 +12,6 @@ const Makeboard  = () : number[][] =>{
   return board;
 }
 
-const moveLeft = (board : number[][]) : number[][] => {
-  return board.map(row => {
-    const newRow : number[] = row.filter(tile => tile !== 0)
-    for(let i: number = 0; i < newRow.length; i++){
-      if(newRow[i] === newRow[i+1]){
-        newRow[i] *= 2
-        setScore(score + newRow[i]*2)
-        newRow[i+1] = 0;
-      }
-    }
-    const combined : number[] = newRow.filter(tile => tile !== 0)
-    while(combined.length < board.length){
-      combined.push(0)
-    }
-    return combined;
-  });
-}
-
 const addRandomTile= (board : number[][]) : number[][] | undefined=>{
   const emptyTiles : {x : number, y : number}[] = [];
   for(let i : number = 0; i < board.length; i++){
@@ -46,25 +28,48 @@ const addRandomTile= (board : number[][]) : number[][] | undefined=>{
   return board;
 }
 
-const moveRight = (board : number[][]):number[][] => {
-  const newBoard : number[][] =  board.map(row => row.slice().reverse());
-  return moveLeft(newBoard).map(row => row.reverse());
+const moveLeft = (board : number[][]) : { newBoard: number[][] ,scoreData : number} => {
+  let scoreData : number = 0
+  const newBoard = board.map(row => {
+    const newRow : number[] = row.filter(tile => tile !== 0)
+    for(let i: number = 0; i < newRow.length; i++){
+      if(newRow[i] === newRow[i+1]){
+        newRow[i] *= 2
+        scoreData += newRow[i]
+        newRow[i+1] = 0;
+      }
+    }
+    const combined : number[] = newRow.filter(tile => tile !== 0)
+    while(combined.length < board.length){
+      combined.push(0)
+    }
+    return combined;
+  });
+  return {newBoard, scoreData};
+}
+
+const moveRight = (board : number[][]): { newBoard: number[][] ,scoreData : number} => {
+  const reversed : number[][] =  board.map(row => row.slice().reverse());
+  const {newBoard, scoreData} = moveLeft(reversed);
+  return { newBoard : newBoard.map(row => row.reverse()),
+    scoreData
+  };
 }
 
 const transpose = (board : number[][]) : number[][] => {
   return board[0].map((_, i) => board.map(row => row[i]));
 }
 
-const moveUp = (board : number[][]) : number[][] => {
+const moveUp = (board : number[][]) : { newBoard: number[][] ,scoreData : number} => {
   const transposedBoard : number[][] = transpose(board);
-  const newBoard : number[][] = moveLeft(transposedBoard);
-  return transpose(newBoard);
+  const {newBoard, scoreData} = moveLeft(transposedBoard);
+  return {newBoard : transpose(newBoard), scoreData}
 }
 
-const moveDown = (board : number[][]) : number[][] => {
+const moveDown = (board : number[][]) : { newBoard: number[][] ,scoreData : number} => {
   const transposedBoard : number[][] = transpose(board);
-  const newBoard : number[][] = moveRight(transposedBoard);
-  return transpose(newBoard);
+  const {newBoard, scoreData} = moveRight(transposedBoard);
+  return {newBoard : newBoard, scoreData};
 }
 
 const isGameOver = (board : number[][]) : boolean => {
@@ -84,19 +89,21 @@ const App = () => {
   const [score, setScore] = useState<number>(0);
   useEffect(() => {
     const handleKeyDown = (e : KeyboardEvent) => {
-      let newBoard : number[][] = [];
-      if (e.key === 'ArrowLeft') newBoard = moveLeft(board)
-      else if(e.key === 'ArrowRight') newBoard = moveRight(board)
-      else if(e.key === 'ArrowUp') newBoard = moveUp(board)
-      else if(e.key === 'ArrowDown') newBoard = moveDown(board)
+      let result: { newBoard: number[][]; scoreData: number } | null = null;
+
+      if (e.key === 'ArrowLeft') result = moveLeft(board);
+      else if (e.key === 'ArrowRight') result = moveRight(board);
+      else if (e.key === 'ArrowUp') result = moveUp(board);
+      else if (e.key === 'ArrowDown') result = moveDown(board);
       else return;
 
-      const moved : boolean= JSON.stringify(board) !== JSON.stringify(newBoard)
+      const moved : boolean= JSON.stringify(board) !== JSON.stringify(result.newBoard)
       if(!moved) return;
 
-      const addTileNewBoard : number[][] | undefined = addRandomTile(newBoard)
+      const addTileNewBoard : number[][] | undefined = addRandomTile(result.newBoard)
       setBoard(addTileNewBoard!)
-      setGameOver(isGameOver(newBoard))
+      setScore(score + result.scoreData)
+      setGameOver(isGameOver(result.newBoard))
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -111,7 +118,7 @@ const App = () => {
 
   return (
     <Root>
-      {/*<h1>점수 : {score}</h1>*/}
+      <h1>점수 : {score}</h1>
       <StyledBoard className="board">
         {board.map((row : number[], x : number) => (
           <StyledRow className="row" key={x}>
