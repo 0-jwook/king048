@@ -4,6 +4,7 @@ import GameOverModal from "./GameOverModal.tsx";
 
 const SIZE : number = 4;
 
+
 const Makeboard  = () : number[][] =>{
   const board : number[][]  = Array(SIZE).fill(0).map(() => Array(SIZE).fill(0));
   addRandomTile(board);
@@ -17,6 +18,7 @@ const moveLeft = (board : number[][]) : number[][] => {
     for(let i: number = 0; i < newRow.length; i++){
       if(newRow[i] === newRow[i+1]){
         newRow[i] *= 2
+        setScore(score + newRow[i]*2)
         newRow[i+1] = 0;
       }
     }
@@ -79,6 +81,7 @@ const isGameOver = (board : number[][]) : boolean => {
 const App = () => {
   const [board, setBoard] = useState<number[][]>(Makeboard());
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [score, setScore] = useState<number>(0);
   useEffect(() => {
     const handleKeyDown = (e : KeyboardEvent) => {
       let newBoard : number[][] = [];
@@ -108,6 +111,7 @@ const App = () => {
 
   return (
     <Root>
+      {/*<h1>점수 : {score}</h1>*/}
       <StyledBoard className="board">
         {board.map((row : number[], x : number) => (
           <StyledRow className="row" key={x}>
