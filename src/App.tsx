@@ -118,7 +118,7 @@ const App = () => {
 
   return (
     <Root>
-      <h1>점수 : {score}</h1>
+      <StyledScore>점수 : {score}</StyledScore>
       <StyledBoard className="board">
         {board.map((row : number[], x : number) => (
           <StyledRow className="row" key={x}>
@@ -141,8 +141,17 @@ const Root = styled.div`
     height: 100vh;
     background-color: white;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 10px;
+`
+
+const StyledScore = styled.p`
+    font-family: Pretendard, serif;
+    font-size: 30px;
+    margin: 0;
+    padding: 0;
 `
 
 const StyledRow = styled.div`
