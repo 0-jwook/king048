@@ -53,10 +53,10 @@ const moveLeft = (board : number[][]) : { newBoard: number[][] ,scoreData : numb
 
 const moveRight = (board : number[][]): { newBoard: number[][] ,scoreData : number, recentlyMergedTiles : {x:number, y:number}[]} => {
   const reversed : number[][] =  board.map(row => row.slice().reverse());
-  const {newBoard, scoreData, recentlyMergedTiles} = moveLeft(reversed);
-  return { newBoard : newBoard.map(row => row.reverse()),
-    scoreData, recentlyMergedTiles
-  };
+  const {newBoard : movedBoard, scoreData, recentlyMergedTiles} = moveLeft(reversed);
+  const newBoard : number[][] = movedBoard.map(row => row.reverse());
+  const changedRecentlyMergedTiles : {x:number, y:number}[] = recentlyMergedTiles.map(({x,y}) => ({x , y: SIZE - 1 - y}));
+  return { newBoard, scoreData, recentlyMergedTiles : changedRecentlyMergedTiles};
 }
 
 const transpose = (board : number[][]) : number[][] => {
@@ -65,14 +65,18 @@ const transpose = (board : number[][]) : number[][] => {
 
 const moveUp = (board : number[][]) : { newBoard: number[][] ,scoreData : number, recentlyMergedTiles : {x:number, y:number}[]} => {
   const transposedBoard : number[][] = transpose(board);
-  const {newBoard, scoreData, recentlyMergedTiles} = moveLeft(transposedBoard);
-  return {newBoard : transpose(newBoard), scoreData, recentlyMergedTiles}
+  const {newBoard: movedBoard, scoreData, recentlyMergedTiles} = moveLeft(transposedBoard);
+  const newBoard : number[][] = transpose(movedBoard);
+  const changedRecentlyMergedTiles : {x:number, y:number}[] = recentlyMergedTiles.map(({x,y}) => ({x : y , y : x }));
+  return { newBoard, scoreData, recentlyMergedTiles : changedRecentlyMergedTiles};
 }
 
 const moveDown = (board : number[][]) : { newBoard: number[][] ,scoreData : number, recentlyMergedTiles : {x:number, y:number}[]} => {
   const transposedBoard : number[][] = transpose(board);
-  const {newBoard, scoreData, recentlyMergedTiles} = moveRight(transposedBoard);
-  return {newBoard : transpose(newBoard), scoreData, recentlyMergedTiles};
+  const {newBoard: movedBoard, scoreData, recentlyMergedTiles} = moveRight(transposedBoard);
+  const newBoard : number[][] = transpose(movedBoard);
+  const changedRecentlyMergedTiles : {x:number, y:number}[] = recentlyMergedTiles.map(({x,y}) => ({x : y , y : x }));
+  return {newBoard, scoreData, recentlyMergedTiles : changedRecentlyMergedTiles};
 }
 
 const isGameOver = (board : number[][]) : boolean => {
