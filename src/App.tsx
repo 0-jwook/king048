@@ -28,15 +28,18 @@ const addRandomTile= (board : number[][]) : number[][] | undefined=>{
   return board;
 }
 
-const moveLeft = (board : number[][]) : { newBoard: number[][] ,scoreData : number} => {
+const moveLeft = (board : number[][]) : { newBoard: number[][] ,scoreData : number, recentlyMergedTiles: {x : number, y : number}[]} => {
   let scoreData : number = 0
-  const newBoard = board.map(row => {
+  const recentlyMergedTiles : { x: number; y: number }[] = [];
+
+  const newBoard = board.map((row, rowIndex) => {
     const newRow : number[] = row.filter(tile => tile !== 0)
     for(let i: number = 0; i < newRow.length; i++){
       if(newRow[i] === newRow[i+1]){
         newRow[i] *= 2
         scoreData += newRow[i]
         newRow[i+1] = 0;
+        recentlyMergedTiles.push({x : rowIndex, y : i});
       }
     }
     const combined : number[] = newRow.filter(tile => tile !== 0)
@@ -45,14 +48,14 @@ const moveLeft = (board : number[][]) : { newBoard: number[][] ,scoreData : numb
     }
     return combined;
   });
-  return {newBoard, scoreData};
+  return {newBoard, scoreData, recentlyMergedTiles};
 }
 
-const moveRight = (board : number[][]): { newBoard: number[][] ,scoreData : number} => {
+const moveRight = (board : number[][]): { newBoard: number[][] ,scoreData : number, recentlyMergedTiles : {x:number, y:number}[]} => {
   const reversed : number[][] =  board.map(row => row.slice().reverse());
-  const {newBoard, scoreData} = moveLeft(reversed);
+  const {newBoard, scoreData, recentlyMergedTiles} = moveLeft(reversed);
   return { newBoard : newBoard.map(row => row.reverse()),
-    scoreData
+    scoreData, recentlyMergedTiles
   };
 }
 
@@ -60,16 +63,16 @@ const transpose = (board : number[][]) : number[][] => {
   return board[0].map((_, i) => board.map(row => row[i]));
 }
 
-const moveUp = (board : number[][]) : { newBoard: number[][] ,scoreData : number} => {
+const moveUp = (board : number[][]) : { newBoard: number[][] ,scoreData : number, recentlyMergedTiles : {x:number, y:number}[]} => {
   const transposedBoard : number[][] = transpose(board);
-  const {newBoard, scoreData} = moveLeft(transposedBoard);
-  return {newBoard : transpose(newBoard), scoreData}
+  const {newBoard, scoreData, recentlyMergedTiles} = moveLeft(transposedBoard);
+  return {newBoard : transpose(newBoard), scoreData, recentlyMergedTiles}
 }
 
-const moveDown = (board : number[][]) : { newBoard: number[][] ,scoreData : number} => {
+const moveDown = (board : number[][]) : { newBoard: number[][] ,scoreData : number, recentlyMergedTiles : {x:number, y:number}[]} => {
   const transposedBoard : number[][] = transpose(board);
-  const {newBoard, scoreData} = moveRight(transposedBoard);
-  return {newBoard : newBoard, scoreData};
+  const {newBoard, scoreData, recentlyMergedTiles} = moveRight(transposedBoard);
+  return {newBoard : transpose(newBoard), scoreData, recentlyMergedTiles};
 }
 
 const isGameOver = (board : number[][]) : boolean => {
@@ -87,9 +90,13 @@ const App = () => {
   const [board, setBoard] = useState<number[][]>(Makeboard());
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
+  const [highScore, setHighScore] = useState<number>(0);
+  const [recentlyMergedTiles, setRecentlyMergedTiles] = useState<{ x: number; y: number }[]>([]);
+
   useEffect(() => {
     const handleKeyDown = (e : KeyboardEvent) => {
-      let result: { newBoard: number[][]; scoreData: number } | null = null;
+      if(gameOver) return;
+      let result: { newBoard: number[][]; scoreData: number; recentlyMergedTiles : {x:number, y:number}[]} | null = null;
 
       if (e.key === 'ArrowLeft') result = moveLeft(board);
       else if (e.key === 'ArrowRight') result = moveRight(board);
@@ -102,36 +109,44 @@ const App = () => {
 
       const addTileNewBoard : number[][] | undefined = addRandomTile(result.newBoard)
       setBoard(addTileNewBoard!)
-      setScore(score + result.scoreData)
+      setScore(preScore => preScore + result.scoreData)
+      setRecentlyMergedTiles(result.recentlyMergedTiles)
       setGameOver(isGameOver(result.newBoard))
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [board]);
+  }, [board, gameOver, score, highScore]);
+
+  //최신 하이스코어
+  useEffect(() => {
+    if(score > highScore) setHighScore(score);
+  }, [score, highScore]);
 
 
   const handleCloseModal = () => {
     setGameOver(false);
     setBoard(Makeboard());
+    setScore(0);
   };
 
   return (
     <Root>
+      <StyledScore>최고 점수 : {highScore}</StyledScore>
       <StyledScore>점수 : {score}</StyledScore>
       <StyledBoard className="board">
         {board.map((row : number[], x : number) => (
           <StyledRow className="row" key={x}>
             {row.map((tile : number, y : number) => (
-              <StyledTile number={tile} className="tile" key={y}>
+              <StyledTile number={tile} className="tile" key={y} isMerged={recentlyMergedTiles.some(t => t.x === x && t.y === y)}>
                 <StyledTileLetter>{tile !== 0 ? tile : ''}</StyledTileLetter>
               </StyledTile>
             ))}
           </StyledRow>
         ))}
       </StyledBoard>
-      {gameOver && <GameOverModal onClose={handleCloseModal} />}
-      {/*<GameOverModal onClose={handleCloseModal}/>*/}
+      {gameOver && <GameOverModal onClose={handleCloseModal} score={score} highScore={highScore} />}
+      {/*<GameOverModal onClose={handleCloseModal} score={score} />*/}
     </Root>
   )
 }
@@ -179,8 +194,9 @@ const getColor = (number : number) => {
   if(number === 131072) return '#000';
 }
 
-const StyledTile = styled.div<{number : number}>`
-    background-color: ${({number}) => getColor(number) };
+const StyledTile = styled.div<{number : number; isMerged : boolean}>`
+background-color: ${({number}) => getColor(number) };
+    box-shadow: 0 0 ${({number}) => number>=256 ? '10px' : '0px'} ${({number}) => getColor(number) };
     width: 100px;
     height: 100px;
     //border: 1px solid black;
@@ -189,6 +205,8 @@ const StyledTile = styled.div<{number : number}>`
     display: flex;
     justify-content: center;
     align-items: center;
+    transform: scale(${({ isMerged }) => (isMerged ? 1.2 : 1)});
+    transition: transform 0.15s ease;
 `
 
 const StyledBoard = styled.div`
