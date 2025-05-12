@@ -2,7 +2,8 @@ import {useEffect, useState} from 'react'
 import styled from "@emotion/styled";
 import GameOverModal from "./GameOverModal.tsx";
 
-const SIZE: number = 4;
+
+const SIZE: number = 4
 
 
 const Makeboard = (): number[][] => {
@@ -165,7 +166,7 @@ const App = () => {
         {board.map((row: number[], x: number) => (
           <StyledRow className="row" key={x}>
             {row.map((tile: number, y: number) => (
-              <StyledTile number={tile} key={y} className={`tile ${recentlyMergedTiles.some(t => t.x === x && t.y === y) ? 'merged-tile' : ''}`}>
+              <StyledTile number={tile} key={y} className={`tile ${recentlyMergedTiles.some(t => t.x === x && t.y === y) ? 'merged-tile' : ''}`} >
                 <StyledTileLetter>{tile !== 0 ? tile : ''}</StyledTileLetter>
               </StyledTile>
             ))}
