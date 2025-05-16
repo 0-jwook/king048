@@ -1,8 +1,6 @@
 import {useEffect, useState} from 'react'
 import styled from "@emotion/styled";
 import GameOverModal from "./GameOverModal.tsx";
-
-
 const SIZE: number = 4
 
 
@@ -174,7 +172,6 @@ const App = () => {
         ))}
       </StyledBoard>
       {gameOver && <GameOverModal onClose={handleCloseModal} score={score} highScore={highScore}/>}
-      {/*<GameOverModal onClose={handleCloseModal} score={score} />*/}
     </Root>
   )
 }
@@ -210,7 +207,7 @@ const getColor = (number: number) => {
   if (number === 32) return '#f67c5f';
   if (number === 64) return '#f65e3b';
   if (number === 128) return '#edcf72';
-  if (number === 256) return '#edcc61';
+  if (number === 256) return '#eecd5e';
   if (number === 512) return '#9c0';
   if (number === 1024) return '#33b5e5';
   if (number === 2048) return '#09c';
@@ -224,7 +221,7 @@ const getColor = (number: number) => {
 
 const StyledTile = styled.div<{ number: number; }>`
     background-color: ${({number}) => getColor(number)};
-    box-shadow: 0 0 ${({number}) => number >= 256 ? '10px' : '0px'} ${({number}) => getColor(number)};
+    box-shadow: 0 0 ${({number}) => number >= 256 ? '20px' : '0px'} ${({number}) => getColor(number)};
     width: 100px;
     height: 100px;
     //border: 1px solid black;
@@ -248,7 +245,7 @@ const StyledTile = styled.div<{ number: number; }>`
         100% {
             transform: scale(1);
         }
-    }
+    }; 
 `
 
 const StyledBoard = styled.div`
